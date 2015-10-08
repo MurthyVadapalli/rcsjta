@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -45,6 +46,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -138,29 +140,35 @@ public abstract class OneToOneChatSession extends ChatSession {
         String from = ChatUtils.ANONYMOUS_URI;
         String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
-        String networkContent;
         String mimeType = msg.getMimeType();
+        String networkMimeType = ChatUtils.apiMimeTypeToNetworkMimeType(mimeType);
+        long timestampSent = msg.getTimestampSent();
+        String networkContent = msg.getContent();
+        String data;
+        if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+            networkContent = ChatUtils.persistedGeolocContentToNetworkGeolocContent(networkContent,
+                    msgId, timestampSent);
+        }
         if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
-                    mimeType, msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, networkContent,
+                    networkMimeType, timestampSent);
         } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
-                    msg.getContent(), mimeType, msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId, networkContent,
+                    networkMimeType, timestampSent);
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
-                    msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
+                    timestampSent);
         }
 
-        if (ChatUtils.isGeolocType(mimeType)) {
-            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+        if (ChatUtils.isGeolocType(networkMimeType)) {
+            sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.GeoLocation);
         } else {
-            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+            sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.TextMessage);
         }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).onMessageSent(msgId, apiMimeType);
+            ((ChatSessionListener) listener).onMessageSent(msgId, mimeType);
         }
     }
 
@@ -414,14 +422,8 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     private void handleError(ChatMessage msg, ChatError error) {
         String msgId = msg.getMessageId();
-        String apiMimeType;
-        if (FileTransferUtils.isFileTransferHttpType(msg.getMimeType())) {
-            apiMimeType = FileTransferHttpInfoDocument.MIME_TYPE;
-        } else {
-            apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-        }
         for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener).onImError(error, msgId, apiMimeType);
+            ((OneToOneChatSessionListener) listener).onImError(error, msgId, msg.getMimeType());
         }
     }
 }

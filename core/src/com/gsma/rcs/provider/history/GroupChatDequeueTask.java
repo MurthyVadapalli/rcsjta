@@ -146,12 +146,6 @@ public class GroupChatDequeueTask extends DequeueTask {
                             }
                             long timestamp = System.currentTimeMillis();
                             String content = cursor.getString(contentIdx);
-                            if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                                Geoloc geoloc = new Geoloc(content);
-                                content = ChatUtils.buildGeolocDocument(geoloc, ImsModule
-                                        .getImsUserProfile().getPublicUri(), id, timestamp);
-                            }
-
                             /* For outgoing message, timestampSent = timestamp */
                             ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
                                     content, null, null, timestamp, timestamp);

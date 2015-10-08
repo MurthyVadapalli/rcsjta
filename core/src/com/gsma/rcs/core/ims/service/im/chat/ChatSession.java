@@ -569,8 +569,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
                     } else if (ChatUtils.isGeolocType(contentType)) {
                         ChatMessage msg = new ChatMessage(cpimMsgId, contact,
-                                cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
-                                timestamp, timestampSent, null);
+                                ChatUtils.networkGeolocContentToPersistedGeolocContent(cpimMsg
+                                        .getMessageContent()), MimeType.GEOLOC_MESSAGE, timestamp,
+                                timestampSent, null);
                         receive(msg, imdnDisplayedRequested);
                     }
                 }

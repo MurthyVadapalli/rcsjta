@@ -291,23 +291,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 
         ChatMessage firstMessage = session.getFirstMessage();
         if (firstMessage != null) {
-            String mimeType = firstMessage.getMimeType();
-            if (ChatUtils.isGeolocType(mimeType)) {
-                mOneToOneChatEventBroadcaster.broadcastMessageReceived(MimeType.GEOLOC_MESSAGE,
-                        firstMessage.getMessageId());
-            } else if (ChatUtils.isTextPlainType(mimeType)) {
-                mOneToOneChatEventBroadcaster.broadcastMessageReceived(MimeType.TEXT_MESSAGE,
-                        firstMessage.getMessageId());
-            } else {
-                /*
-                 * Only geolocation and text messages are valid parameters into this method. Thus it
-                 * is certain at this point that it can only be a text message.
-                 */
-                throw new IllegalArgumentException(new StringBuilder("The mimetype '")
-                        .append(mimeType)
-                        .append("' is not supported by this chat service implementation!")
-                        .toString());
-            }
+            mOneToOneChatEventBroadcaster.broadcastMessageReceived(firstMessage.getMimeType(),
+                    firstMessage.getMessageId());
         }
     }
 
