@@ -19,7 +19,6 @@ package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
@@ -37,8 +36,6 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.content.Context;

@@ -973,8 +973,8 @@ public class ChatUtils {
             return new ChatMessage(msgId, contact, content, MimeType.TEXT_MESSAGE, timestamp,
                     timestampSent, displayName);
         } else if (MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
-            return new ChatMessage(msgId, contact, content, GeolocInfoDocument.MIME_TYPE,
-                    timestamp, timestampSent, displayName);
+            return new ChatMessage(msgId, contact, content, MimeType.GEOLOC_MESSAGE, timestamp,
+                    timestampSent, displayName);
         }
         throw new IllegalArgumentException(
                 "Unable to create message, Invalid mimetype ".concat(apiMimeType));
